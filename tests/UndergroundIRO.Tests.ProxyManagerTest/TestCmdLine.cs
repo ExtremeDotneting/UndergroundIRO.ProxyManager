@@ -6,6 +6,7 @@ using IRO.XWebView.CefSharp.OffScreen.Providers;
 using IRO.XWebView.Core;
 using IRO.XWebView.Core.Consts;
 using Newtonsoft.Json;
+using UndergroundIRO.ParseKit.Network;
 using UndergroundIRO.ProxyManager.Core;
 using UndergroundIRO.ProxyManager.Core.Models;
 using UndergroundIRO.ProxyManager.HidemyParser;
@@ -30,7 +31,8 @@ namespace UndergroundIRO.Tests.BestChangeParserKitTest
                 MaxTime = 1000,
                 Limit = int.MaxValue
             };
-            var parser = new HidemyProxyParser(GetXWV());
+            var httpService = new XWebViewHttpService(GetXWV());
+            var parser = new HidemyProxyParser(httpService);
             var list = parser.Parse(settings).Result;
             Cmd.WriteLine(JsonConvert.SerializeObject(list, Formatting.Indented));
             Cmd.WriteLine("\n\nCall number: " + _callNum++);

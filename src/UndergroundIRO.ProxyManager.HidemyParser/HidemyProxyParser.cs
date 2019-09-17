@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
-using IRO.XWebView.Core;
-using IRO.XWebView.Extensions;
 using Newtonsoft.Json;
-using UndergroundIRO.ProxyManager.Core;
+using UndergroundIRO.ParseKit.Network;
 using UndergroundIRO.ProxyManager.Core.Models;
 using UndergroundIRO.ProxyManager.HidemyParser.Exceptions;
 
@@ -18,11 +12,15 @@ namespace UndergroundIRO.ProxyManager.HidemyParser
 {
     public class HidemyProxyParser
     {
-        readonly IXWebView _xwv;
+        readonly IHttpService _httpService;
 
-        public HidemyProxyParser(IXWebView xwv)
+        /// <summary>
+        /// Please use <see cref="XWebViewHttpService"/> .
+        /// </summary>
+        /// <param name="httpService"></param>
+        public HidemyProxyParser(IHttpService httpService)
         {
-            _xwv = xwv ?? throw new ArgumentNullException(nameof(xwv));
+            _httpService = httpService ?? throw new ArgumentNullException(nameof(httpService));
         }
 
         public static string GetUrl(HidemyProxyParseSettings s)
@@ -80,7 +78,7 @@ namespace UndergroundIRO.ProxyManager.HidemyParser
             return url;
 
         }
-        
+
         public async Task<IList<Proxy>> Parse(HidemyProxyParseSettings settings)
         {
             var hidemyUrl = GetUrl(settings);
@@ -89,22 +87,10 @@ namespace UndergroundIRO.ProxyManager.HidemyParser
 
         public async Task<IList<Proxy>> Parse(string hidemyUrl, int? limit = null)
         {
-            var list=await ParseOnly(hidemyUrl, limit);
+            var list = await ParseOnly(hidemyUrl, limit);
             var fitHashSet = FitCollection(list);
             return fitHashSet.ToList();
         }
-
-        async Task ShowScreenshot()
-        {
-            var base64img = await _xwv.ScreenshotViaJs();
-            var bitmap = Htm2CanvasExtensions.Base64StringToBitmap(base64img);
-            var imageFilePath = Environment.CurrentDirectory + "/screenshot.png";
-            if (File.Exists(imageFilePath))
-                File.Delete(imageFilePath);
-            bitmap.Save(imageFilePath);
-            Process.Start(imageFilePath);
-        }
-
 
         async Task<IList<Proxy>> ParseOnly(string hidemyUrl, int? limit)
         {
@@ -115,8 +101,7 @@ namespace UndergroundIRO.ProxyManager.HidemyParser
                 while (true)
                 {
                     var pageUrl = GetUrlWithPageNum(hidemyUrl, pageNum);
-                    await _xwv.LoadUrl(pageUrl);
-                    var html = await _xwv.GetHtml();
+                    var html = await _httpService.GetAsync(pageUrl);
                     var hw = new HtmlDocument();
                     hw.LoadHtml(html);
                     hw.OptionUseIdAttribute = true;

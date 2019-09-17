@@ -6,8 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
-    <PackageReference Include="IRO.XWebView.Core" Version="1.1.3" />
-    <PackageReference Include="IRO.XWebView.Extensions" Version="1.1.3" />
+    <PackageReference Include="UndergroundIRO.ParseKit" Version="1.0.2" />
   </ItemGroup>
 
   <ItemGroup>
